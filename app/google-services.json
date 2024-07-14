@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "796674075596",
+    "firebase_url": "https://production-accounting-eb312-default-rtdb.firebaseio.com",
+    "project_id": "production-accounting-eb312",
+    "storage_bucket": "production-accounting-eb312.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:796674075596:android:f8ea03a5a15b2dbdda8b69",
+        "android_client_info": {
+          "package_name": "com.example.otchet_work"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCETaE7HwKsJ0v_Arg_DruhevuQNbnjgBg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

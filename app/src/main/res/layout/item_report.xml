@@ -4,15 +4,16 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:background="@drawable/item_back">
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:id="@+id/imageView_reports"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_marginEnd="16dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_placeholder"/>
+        android:background="@drawable/round_background"
+        android:clipToOutline="true" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -26,7 +27,17 @@
             android:layout_height="wrap_content"
             android:text="Object Name"
             android:textStyle="bold"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:textColor="@android:color/black" />
+
+        <TextView
+            android:id="@+id/kvartiraTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="kvartira"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/black" />
 
         <TextView
             android:id="@+id/descriptionTextView"
@@ -34,7 +45,17 @@
             android:layout_height="wrap_content"
             android:text="Description of what was done"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"/>
+            android:textColor="@android:color/black" />
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/timeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time"
+        android:textSize="14sp"
+        android:textColor="@android:color/black"
+        android:layout_gravity="top|end" />
 
 </LinearLayout>

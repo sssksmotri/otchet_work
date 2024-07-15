@@ -1,0 +1,6 @@
+<!-- round_background.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="27dp"/> <!-- радиус должен быть половиной ширины/высоты ImageView -->
+    <solid android:color="@android:color/white"/>
+</shape>

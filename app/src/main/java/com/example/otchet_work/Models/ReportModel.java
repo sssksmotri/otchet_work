@@ -11,12 +11,12 @@ public class ReportModel {
     private String photoUri; // Change to String to match the database storage format
     private String userId;
     private String ReportID;
-
+    private String actionType;
     public ReportModel() {
         // Empty constructor needed for Firebase
     }
 
-    public ReportModel(String action, String apartment, String comments, String datetime, String firstName, String lastName, String objectName, String photoUri, String userId) {
+    public ReportModel(String action, String apartment, String comments, String datetime, String firstName, String lastName, String objectName, String photoUri, String userId,String actionType, String ReportID) {
         this.action = action;
         this.apartment = apartment;
         this.comments = comments;
@@ -26,6 +26,17 @@ public class ReportModel {
         this.objectName = objectName;
         this.photoUri = photoUri; // Change to String to match the database storage format
         this.userId = userId;
+        this.actionType=actionType;
+        this.ReportID=ReportID;
+
+    }
+
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
     }
 
     public String getReportID() {

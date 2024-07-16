@@ -64,6 +64,17 @@
                 android:textColor="@android:color/black"
                 android:layout_marginTop="16dp"/>
 
+            <!-- Выбор существующего объекта -->
+            <Spinner
+                android:id="@+id/spinnerExistingObjects"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Выберите существующий объект"
+                android:padding="12dp"
+                android:background="@drawable/edit_text_background"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="16dp"/>
+
             <!-- Выбор квартиры -->
             <Spinner
                 android:id="@+id/spinnerApartments"
@@ -104,7 +115,7 @@
             <ImageView
                 android:id="@+id/imageViewPhoto"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="150dp"
                 android:scaleType="centerCrop"
                 android:contentDescription="Выбранное фото"
                 android:layout_marginTop="16dp"/>

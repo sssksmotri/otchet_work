@@ -1,7 +1,7 @@
 package com.example.otchet_work.Models;
 
 public class User {
-    public String email, password, firstName, lastName;
+    public String email, password, firstName, lastName;;
 
     public User() {
     }
@@ -11,8 +11,10 @@ public class User {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+
     }
 
+    // Getters and Setters
     public String getEmail() {
         return email;
     }
@@ -44,4 +46,6 @@ public class User {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+
 }

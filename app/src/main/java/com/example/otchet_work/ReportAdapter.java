@@ -1,7 +1,9 @@
 package com.example.otchet_work;
+
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.otchet_work.Models.ReportModel;
-import com.example.otchet_work.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,9 +88,12 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             // Обработка случая отсутствия изображения
             holder.imageView.setImageDrawable(null);
         }
+
+        // Установка OnClickListener для перехода к активности обновления отчета
         holder.itemView.setOnClickListener(v -> {
+            Log.d("ReportAdapter", "Item clicked: " + report.getReportID());
             Intent intent = new Intent(context, ReportUpdate.class);
-            intent.putExtra("reportId", report.getReportID()); // Assuming you have a getReportId method
+            intent.putExtra("reportId", report.getReportID()); // Pass the report ID
             context.startActivity(intent);
         });
     }

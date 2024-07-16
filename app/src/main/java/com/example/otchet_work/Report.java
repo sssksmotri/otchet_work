@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -41,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -52,23 +55,24 @@ public class Report extends AppCompatActivity {
     private Uri imageUri;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
-
+    private String currentActionType;
     private EditText editObjectName, editComments;
-    private Spinner spinnerApartments, spinnerActions;
+    private Spinner spinnerApartments, spinnerActions, spinnerExistingObjects;
     private ImageView imageViewPhoto;
     private TextView reportTitleTextView;
+    private DatabaseReference existingObjectsRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
 
-        // Extract intent extras
-        int menuItemId = getIntent().getIntExtra("menuItem", R.id.ventilation); // Default to ventilation if not provided
+        int menuItemId = getIntent().getIntExtra("menuItem", R.id.ventilation);
         String userId = getIntent().getStringExtra("userId");
 
         databaseReference = FirebaseDatabase.getInstance().getReference("reports");
         storageReference = FirebaseStorage.getInstance().getReference();
+        existingObjectsRef = FirebaseDatabase.getInstance().getReference("existing_objects");
 
         editObjectName = findViewById(R.id.editObjectName);
         editComments = findViewById(R.id.editComments);
@@ -76,6 +80,7 @@ public class Report extends AppCompatActivity {
         spinnerActions = findViewById(R.id.spinnerActions);
         imageViewPhoto = findViewById(R.id.imageViewPhoto);
         reportTitleTextView = findViewById(R.id.textTitle);
+        spinnerExistingObjects = findViewById(R.id.spinnerExistingObjects);
 
         ArrayAdapter<CharSequence> apartmentsAdapter = ArrayAdapter.createFromResource(this,
                 R.array.apartments_array, android.R.layout.simple_spinner_item);
@@ -85,39 +90,48 @@ public class Report extends AppCompatActivity {
         ArrayAdapter<CharSequence> actionsAdapter = null;
 
         String reportTitle = "";
+        String actionType = "";
 
         if (menuItemId == R.id.ventilation) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
                     R.array.ventilation_array, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по вентиляции";
+            actionType = "ventilation";
         } else if (menuItemId == R.id.brickwork) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
                     R.array.brickwork_array, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по кирпичным работам";
+            actionType = "brickwork";
         } else if (menuItemId == R.id.plumbing) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
                     R.array.plumbing_array, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по сантехнике";
+            actionType = "plumbing";
         } else if (menuItemId == R.id.drywall) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
                     R.array.drywall_array, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по гипсокартонным работам";
+            actionType = "drywall";
         } else if (menuItemId == R.id.floor_heating) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
                     R.array.floor_heating_array, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по напольному отоплению";
+            actionType = "floor_heating";
         } else if (menuItemId == R.id.switches_sockets) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
                     R.array.switches_sockets_array, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по выключателям и розеткам";
+            actionType = "switches_sockets";
         } else if (menuItemId == R.id.lighting) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
                     R.array.lighting_array, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по освещению";
+            actionType = "lighting";
         } else if (menuItemId == R.id.doors) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
                     R.array.doors_array, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по дверям";
+            actionType = "doors";
         }
 
         if (actionsAdapter != null) {
@@ -125,14 +139,43 @@ public class Report extends AppCompatActivity {
             spinnerActions.setAdapter(actionsAdapter);
         }
 
-        // Set title
+        this.currentActionType = actionType;
         reportTitleTextView.setText(reportTitle);
+
+        // Initialize the existing objects spinner
+        loadExistingObjects();
 
         Button buttonUploadPhoto = findViewById(R.id.buttonUploadPhoto);
         buttonUploadPhoto.setOnClickListener(v -> openFileChooser());
 
         Button buttonSaveReport = findViewById(R.id.buttonSaveReport);
         buttonSaveReport.setOnClickListener(v -> saveReport());
+        ImageButton back_btn = findViewById(R.id.buttonBack);
+        back_btn.setOnClickListener(v -> goBack());
+    }
+    public void goBack() {
+        finish();
+    }
+    private void loadExistingObjects() {
+        existingObjectsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<String> objectsList = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String objectName = snapshot.getValue(String.class);
+                    objectsList.add(objectName);
+                }
+                ArrayAdapter<String> objectsAdapter = new ArrayAdapter<>(Report.this,
+                        android.R.layout.simple_spinner_item, objectsList);
+                objectsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerExistingObjects.setAdapter(objectsAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(Report.this, "Ошибка загрузки объектов", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void openFileChooser() {
@@ -150,30 +193,45 @@ public class Report extends AppCompatActivity {
             imageViewPhoto.setImageURI(imageUri);
         }
     }
-    private void saveReport() {
-        String objectName = editObjectName.getText().toString().trim();
-        String apartment = spinnerApartments.getSelectedItem().toString().trim();
-        String action = spinnerActions.getSelectedItem().toString().trim();
-        String comments = editComments.getText().toString().trim();
 
-        // Get current user
+    private void saveReport() {
+        final String inputObjectName = editObjectName.getText().toString().trim();
+        final String selectedObjectName = spinnerExistingObjects.getSelectedItem() != null ? spinnerExistingObjects.getSelectedItem().toString() : "";
+        final String apartment = spinnerApartments.getSelectedItem().toString().trim();
+        final String action = spinnerActions.getSelectedItem().toString().trim();
+        final String comments = editComments.getText().toString().trim();
+        final String actionType = this.currentActionType;
+
+        if (inputObjectName.isEmpty() && selectedObjectName.isEmpty()) {
+            Toast.makeText(this, "Выберите или введите имя объекта", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final String objectName;
+        if (!inputObjectName.isEmpty()) {
+            addNewObject(inputObjectName);
+            objectName = inputObjectName;
+        } else {
+            objectName = selectedObjectName;
+        }
+
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(this, "Ошибка аутентификации пользователя", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String userId = currentUser.getUid();
+        final String userId = currentUser.getUid();
         DatabaseReference userReportsRef = FirebaseDatabase.getInstance().getReference("reports").child(userId);
 
-        // Generating reportId
         String reportId = userReportsRef.push().getKey();
+        String datetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+
         if (reportId == null) {
-            Toast.makeText(this, "Ошибка при сохранении отчета", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ошибка создания отчета", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Get user details
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -183,8 +241,6 @@ public class Report extends AppCompatActivity {
                     if (user != null) {
                         String firstName = user.getFirstName();
                         String lastName = user.getLastName();
-
-                        String currentDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
                         if (objectName.isEmpty() || apartment.isEmpty() || action.isEmpty() || comments.isEmpty() || imageUri == null) {
                             Toast.makeText(Report.this, "Заполните все поля и загрузите фото", Toast.LENGTH_SHORT).show();
@@ -196,7 +252,7 @@ public class Report extends AppCompatActivity {
                         progressDialog.show();
 
                         // Folder structure for photos
-                        String photoFolder = "WORK/PHOTO/" + currentDateTime.substring(0, 10) + "/" + objectName + "/" + apartment + "/";
+                        String photoFolder = "WORK/PHOTO/" + datetime.substring(0, 10) + "/" + objectName + "/" + apartment + "/";
                         StorageReference objectFolderRef = storageReference.child(photoFolder);
 
                         // File naming for photos
@@ -205,15 +261,14 @@ public class Report extends AppCompatActivity {
                         fileReference.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
                             fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
                                 String photoUrl = uri.toString();
-
-                                // Create ReportModel instance
-                                ReportModel reportModel = new ReportModel(action, apartment, comments, currentDateTime, firstName, lastName, objectName, photoUrl, userId);
+                                // Use the correct constructor for ReportModel
+                                ReportModel reportModel = new ReportModel(action, apartment, comments, datetime, firstName, lastName, objectName, photoUrl, userId, actionType, reportId);
 
                                 // Save report to Firebase Realtime Database under userId/reportId
                                 userReportsRef.child(reportId).setValue(reportModel).addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
                                         try {
-                                            generateExcelReport(objectName, apartment, action, comments, photoUrl, currentDateTime, firstName, lastName);
+                                            generateExcelReport(objectName, apartment, action, comments, photoUrl, datetime, firstName, lastName, reportId);
                                             progressDialog.dismiss();
                                             Toast.makeText(Report.this, "Отчет сохранен", Toast.LENGTH_SHORT).show();
                                         } catch (IOException e) {
@@ -242,17 +297,29 @@ public class Report extends AppCompatActivity {
         });
     }
 
-    private void generateExcelReport(String objectName, String apartment, String action, String comments, String photoUrl, String dateTime, String firstName, String lastName) throws IOException {
+
+
+    private void addNewObject(final String objectName) {
+        existingObjectsRef.child(objectName).setValue(objectName).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(Report.this, "Новый объект добавлен", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(Report.this, "Ошибка добавления нового объекта", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+    private void generateExcelReport(String objectName, String apartment, String action, String comments, String photoUrl, String dateTime, String firstName, String lastName, String reportId) throws IOException {
         String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         String userFullName = firstName + "_" + lastName;
 
-        // Define the directory where the file will be stored for the current day
         File directory = new File(getExternalFilesDir(null), "WORK/REPORTS/" + currentDate);
         if (!directory.exists()) {
-            directory.mkdirs(); // Create directories if they don't exist
+            directory.mkdirs();
         }
 
-        // Define the file path for the current day
         File file = new File(directory, userFullName + ".xlsx");
 
         XSSFWorkbook workbook;
@@ -260,25 +327,20 @@ public class Report extends AppCompatActivity {
         Row dataRow;
         Cell dataCell;
 
-        // Check if the file already exists for the current day
         if (file.exists()) {
-            // If the file exists, open it and get the existing sheet
             Log.d("ExcelReport", "File already exists. Opening...");
             FileInputStream fis = new FileInputStream(file);
             workbook = new XSSFWorkbook(fis);
-            sheet = workbook.getSheetAt(0); // Assuming there's only one sheet
+            sheet = workbook.getSheetAt(0);
             fis.close();
 
-            // Determine the next row number to append data
             int lastRowNum = sheet.getLastRowNum();
-            dataRow = sheet.createRow(lastRowNum + 1); // Create a new row for data
+            dataRow = sheet.createRow(lastRowNum + 1);
         } else {
-            // If the file doesn't exist, create a new workbook and sheet
             Log.d("ExcelReport", "File doesn't exist. Creating new workbook...");
             workbook = new XSSFWorkbook();
             sheet = workbook.createSheet("Report");
 
-            // Create header row
             Row headerRow = sheet.createRow(0);
             Cell headerCell = headerRow.createCell(0);
             headerCell.setCellValue("Имя объекта");
@@ -304,11 +366,12 @@ public class Report extends AppCompatActivity {
             headerCell = headerRow.createCell(7);
             headerCell.setCellValue("Фамилия");
 
-            // Create first data row
+            headerCell = headerRow.createCell(8);
+            headerCell.setCellValue("ReportId");
+
             dataRow = sheet.createRow(1);
         }
 
-        // Populate data into the cells
         dataCell = dataRow.createCell(0);
         dataCell.setCellValue(objectName);
 
@@ -333,7 +396,9 @@ public class Report extends AppCompatActivity {
         dataCell = dataRow.createCell(7);
         dataCell.setCellValue(lastName);
 
-        // Write the workbook to the file system
+        dataCell = dataRow.createCell(8);
+        dataCell.setCellValue(reportId);
+
         FileOutputStream fileOut = new FileOutputStream(file);
         workbook.write(fileOut);
         fileOut.close();
@@ -341,7 +406,6 @@ public class Report extends AppCompatActivity {
 
         Log.d("ExcelReport", "Workbook successfully written to file: " + file.getAbsolutePath());
 
-        // Upload the Excel report to Firebase Storage
         uploadExcelReport(file);
         Log.d("ExcelReport", "Excel report upload initiated.");
     }
@@ -351,7 +415,6 @@ public class Report extends AppCompatActivity {
         String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         String userFullName = file.getName().substring(0, file.getName().lastIndexOf('.'));
 
-        // Folder structure for Excel reports
         StorageReference reportsFolderRef = storageReference.child("WORK/REPORTS/" + currentDate + "/" + userFullName + "/" + file.getName());
 
         reportsFolderRef.putFile(fileUri).addOnSuccessListener(taskSnapshot -> {

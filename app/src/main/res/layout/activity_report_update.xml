@@ -30,7 +30,7 @@
 
             <!-- Кнопка "Назад" -->
             <ImageButton
-                android:id="@+id/buttonBack"
+                android:id="@+id/buttonBack_up"
                 android:layout_width="wrap_content"
                 android:layout_height="35dp"
                 android:src="@drawable/ic_back"
@@ -65,7 +65,7 @@
 
             <!-- Выбор квартиры -->
             <Spinner
-                android:id="@+id/spinnerApartments"
+                android:id="@+id/spinnerApartments_up"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Выберите квартиру"
@@ -76,7 +76,7 @@
 
             <!-- Выбор действия -->
             <Spinner
-                android:id="@+id/spinnerActions"
+                android:id="@+id/spinnerActions_up"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Выберите действие"
@@ -103,7 +103,7 @@
             <ImageView
                 android:id="@+id/imageViewPhoto"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="150dp"
                 android:scaleType="centerCrop"
                 android:contentDescription="Выбранное фото"
                 android:layout_marginTop="16dp"/>
@@ -133,7 +133,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Сохранить"
+                    android:text="Сохранить отчет"
                     android:textColor="@android:color/white"
                     android:background="@drawable/button_background"
                     android:padding="12dp"

@@ -3,8 +3,10 @@ package com.example.otchet_work;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.otchet_work.Models.ReportModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -26,7 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView recyclerView;
     private ReportAdapter adapter;
@@ -34,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private String userId;
     private List<ReportModel> reportsFull; // Сохранение полного списка отчетов для поиска
     private SearchView searchView;
+    private ProgressBar progressBar; // Добавлен ProgressBar
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,19 +63,42 @@ public class MainActivity extends AppCompatActivity {
         adapter = new ReportAdapter(this, new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
-        fetchReports();
+        progressBar = findViewById(R.id.progress_bar); // Инициализация ProgressBar
+
+        bottomNavigationView = findViewById(R.id.navigation_bar);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this); // Установка слушателя
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(this::showPopupMenu);
 
-
-
         searchView = findViewById(R.id.search_view);
         searchView.setIconifiedByDefault(false);
         setupSearchView();
+
+        bottomNavigationView.setSelectedItemId(R.id.navigation_home);
+
+        fetchReports();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.navigation_home) {
+
+            return true;
+        } else if (id == R.id.navigation_profile) {
+
+            startActivity(new Intent(this, ProfileActivity.class));
+            return true;
+        }
+
+        return false;
     }
 
     private void fetchReports() {
+        showProgressBar(); // Показать ProgressBar перед началом загрузки
+
         DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference().child("reports").child(userId);
 
         reportsRef.addValueEventListener(new ValueEventListener() {
@@ -85,11 +113,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 adapter.setData(reports);
                 reportsFull = new ArrayList<>(reports); // Сохраняем полный список отчетов для поиска
+                hideProgressBar(); // Скрыть ProgressBar после завершения загрузки
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(MainActivity.this, "Failed to fetch reports: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                hideProgressBar(); // В случае ошибки скрыть ProgressBar
             }
         });
     }
@@ -130,5 +160,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         searchView.setOnClickListener(v -> searchView.setIconified(false));
+    }
+
+    private void showProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        progressBar.setVisibility(View.GONE);
     }
 }

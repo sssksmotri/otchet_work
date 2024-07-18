@@ -27,11 +27,14 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
     public ReportAdapter(Context context, List<ReportModel> reports) {
         this.context = context;
-        this.reports = reports;
-        this.reportsFull = new ArrayList<>(reports); // Инициализация полного списка отчетов
+        this.reports = reports != null ? reports : new ArrayList<>(); // Ensure reports is not null
+        this.reportsFull = new ArrayList<>(this.reports); // Инициализация полного списка отчетов
     }
 
     public void setData(List<ReportModel> reports) {
+        if (reports == null) {
+            reports = new ArrayList<>();
+        }
         this.reports.clear();
         this.reports.addAll(reports); // Обновляем данные адаптера
         this.reportsFull.clear();
@@ -69,12 +72,9 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
         // Установка данных в элементы интерфейса
         holder.nameTextView.setText(report.getObjectName());
 
-        // Обрезка описания до 50 символов и добавление многоточия
-        String action = report.getAction();
-        if (action.length() > 50) {
-            action = action.substring(0, 50) + "...";
-        }
-        holder.descriptionTextView.setText(action);
+
+
+        holder.komnataTextView.setText(report.getRoomName());
 
         holder.timeTextView.setText(report.getDatetime()); // Установка времени
 
@@ -86,7 +86,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
                     .into(holder.imageView);
         } else {
             // Обработка случая отсутствия изображения
-            holder.imageView.setImageDrawable(null);
+            holder.imageView.setImageResource(R.drawable.ic_basic_kluch);
         }
 
         // Установка OnClickListener для перехода к активности обновления отчета
@@ -106,19 +106,17 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
         TextView nameTextView;
-        TextView descriptionTextView;
+        TextView komnataTextView;
         TextView timeTextView; // Добавлено поле для времени
 
         public ReportViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageView_reports);
             nameTextView = itemView.findViewById(R.id.nameTextView);
-            descriptionTextView = itemView.findViewById(R.id.descriptionTextView);
+            komnataTextView = itemView.findViewById(R.id.komnataTextView);
             timeTextView = itemView.findViewById(R.id.timeTextView); // Инициализация TextView времени
 
-            // Установка ограничений для TextView описания
-            descriptionTextView.setEllipsize(TextUtils.TruncateAt.END);
-            descriptionTextView.setMaxLines(1);
+
         }
     }
 }

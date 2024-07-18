@@ -3,24 +3,22 @@
         android:id="@+id/ventilation"
         android:title="Ветиляція" />
     <item
-        android:id="@+id/brickwork"
-        android:title="Кладка цегли" />
+        android:id="@+id/floor_walls_ceilings"
+        android:title="Підлога / стіни / потолки" />
     <item
         android:id="@+id/plumbing"
         android:title="Сентехніка" />
     <item
-        android:id="@+id/drywall"
-        android:title="Гіпсокартон" />
+        android:id="@+id/electricity"
+        android:title="Електрика" />
     <item
-        android:id="@+id/floor_heating"
-        android:title="Тепла підлога" />
+        android:id="@+id/demolition_works"
+        android:title="Демонтаж" />
     <item
-        android:id="@+id/switches_sockets"
-        android:title="Вимикачі/розеткі" />
+        android:id="@+id/furniture_assembly"
+        android:title="Збирання меблів" />
     <item
-        android:id="@+id/lighting"
-        android:title="Світло" />
-    <item
-        android:id="@+id/doors"
-        android:title="Двері" />
+        android:id="@+id/windows_doors"
+        android:title="Вікна / двері" />
+
 </menu>

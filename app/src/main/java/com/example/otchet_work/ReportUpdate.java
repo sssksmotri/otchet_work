@@ -55,13 +55,12 @@ public class ReportUpdate extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private StorageReference storageReference;
 
-    private EditText editObjectName, editComments;
+    private EditText editObjectName_up, editComments_up;
     private ImageView imageViewPhoto;
-    private Spinner spinnerApartments, spinnerActions;
-    private Button buttonUpdateReport, buttonDeleteReport, buttonUploadPhoto;
+    private Spinner spinnerActions_up;
+    private Button buttonUploadPhoto_up, buttonSaveReport_up;
     private String reportId, photoUri;
     private static final int PICK_IMAGE_REQUEST = 1;
-    private Uri imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,14 +73,11 @@ public class ReportUpdate extends AppCompatActivity {
         storageReference = FirebaseStorage.getInstance().getReference();
 
         // Initialize views
-        editObjectName = findViewById(R.id.editObjectName);
-        editComments = findViewById(R.id.editComments);
-        imageViewPhoto = findViewById(R.id.imageViewPhoto);
-        buttonUpdateReport = findViewById(R.id.buttonUpdateReport);
-        buttonDeleteReport = findViewById(R.id.buttonDeleteReport);
-        buttonUploadPhoto = findViewById(R.id.buttonUploadPhoto);
-        spinnerApartments = findViewById(R.id.spinnerApartments_up);
-        spinnerActions = findViewById(R.id.spinnerActions_up);
+        editObjectName_up = findViewById(R.id.editObjectName_up);
+        editComments_up = findViewById(R.id.editComments_up);
+        spinnerActions_up = findViewById(R.id.spinnerActions_up);
+        buttonUploadPhoto_up = findViewById(R.id.buttonUploadPhoto_up);
+        buttonSaveReport_up = findViewById(R.id.buttonSaveReport_up);
 
         // Get reportId from intent extras
         reportId = getIntent().getStringExtra("reportId");
@@ -94,42 +90,32 @@ public class ReportUpdate extends AppCompatActivity {
             loadReportDetails();
         }
 
+        // Setup Spinner for actions
+        loadActionSpinner("ventilation"); // Example initialization, change as per your logic
+
         // Setup onClickListeners
-        buttonUpdateReport.setOnClickListener(new View.OnClickListener() {
+        buttonSaveReport_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateReport();
             }
         });
 
-        buttonDeleteReport.setOnClickListener(new View.OnClickListener() {
+        buttonUploadPhoto_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                confirmDeleteReport();
+                // Implement photo upload logic
             }
         });
-
-        buttonUploadPhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFileChooser();
-            }
-        });
-
-        // Setup Spinner for apartments
-        ArrayAdapter<CharSequence> apartmentsAdapter = ArrayAdapter.createFromResource(this,
-                R.array.apartments_array, android.R.layout.simple_spinner_item);
-        apartmentsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerApartments.setAdapter(apartmentsAdapter);
 
         ImageButton back_btn = findViewById(R.id.buttonBack_up);
         back_btn.setOnClickListener(v -> goBack());
     }
-    public void goBack() {
+
+    private void goBack() {
         finish();
     }
 
-    // Method to load report details from Firebase
     private void loadReportDetails() {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
@@ -142,16 +128,15 @@ public class ReportUpdate extends AppCompatActivity {
                         ReportModel report = dataSnapshot.getValue(ReportModel.class);
                         if (report != null) {
                             // Set retrieved data to views
-                            editObjectName.setText(report.getObjectName());
-                            editComments.setText(report.getComments());
+                            editObjectName_up.setText(report.getObjectName());
+                            editComments_up.setText(report.getComments());
+                            // Load photo with Glide
                             Glide.with(ReportUpdate.this)
                                     .load(report.getPhotoUri())
                                     .into(imageViewPhoto);
                             photoUri = report.getPhotoUri();
+                            // Load spinner with correct action type
                             loadActionSpinner(report.getActionType());
-                            // Select correct apartment from spinner
-                            int pos = ((ArrayAdapter<String>) spinnerApartments.getAdapter()).getPosition(report.getApartment());
-                            spinnerApartments.setSelection(pos);
                         }
                     }
                 }
@@ -166,48 +151,45 @@ public class ReportUpdate extends AppCompatActivity {
         }
     }
 
+
     // Method to load appropriate actions array in spinner
     private void loadActionSpinner(String actionType) {
         int arrayId = R.array.actions_array;
         switch (actionType) {
             case "ventilation":
-                arrayId = R.array.ventilation_array;
+                arrayId = R.array.ventilation;
                 break;
-            case "brickwork":
-                arrayId = R.array.brickwork_array;
+            case "floor_walls_ceilings":
+                arrayId = R.array.floor_walls_ceilings;
                 break;
             case "plumbing":
-                arrayId = R.array.plumbing_array;
+                arrayId = R.array.plumbing;
                 break;
-            case "drywall":
-                arrayId = R.array.drywall_array;
+            case "electricity":
+                arrayId = R.array.electricity;
                 break;
-            case "floor_heating":
-                arrayId = R.array.floor_heating_array;
+            case "demolition_works":
+                arrayId = R.array.demolition_works;
                 break;
-            case "switches_sockets":
-                arrayId = R.array.switches_sockets_array;
+            case "furniture_assembly":
+                arrayId = R.array.furniture_assembly;
                 break;
-            case "lighting":
-                arrayId = R.array.lighting_array;
-                break;
-            case "doors":
-                arrayId = R.array.doors_array;
+            case "windows_doors":
+                arrayId = R.array.windows_doors;
                 break;
         }
 
         ArrayAdapter<CharSequence> actionsAdapter = ArrayAdapter.createFromResource(this,
                 arrayId, android.R.layout.simple_spinner_item);
         actionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerActions.setAdapter(actionsAdapter);
+        spinnerActions_up.setAdapter(actionsAdapter);
     }
 
     // Method to update report details in Firebase
     private void updateReport() {
-        String updatedObjectName = editObjectName.getText().toString().trim();
-        String updatedComments = editComments.getText().toString().trim();
-        String selectedApartment = spinnerApartments.getSelectedItem().toString();
-        String selectedAction = spinnerActions.getSelectedItem().toString();
+        String updatedObjectName = editObjectName_up.getText().toString().trim();
+        String updatedComments = editComments_up.getText().toString().trim();
+        String selectedAction = spinnerActions_up.getSelectedItem().toString();
 
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
@@ -217,11 +199,7 @@ public class ReportUpdate extends AppCompatActivity {
             // Update report data in Firebase
             reportRef.child("objectName").setValue(updatedObjectName);
             reportRef.child("comments").setValue(updatedComments);
-            reportRef.child("apartment").setValue(selectedApartment);
-            reportRef.child("action").setValue(selectedAction);
-
-            // Update report data in Excel
-            updateInExcel(reportId, updatedObjectName, updatedComments, selectedApartment, selectedAction);
+            reportRef.child("actionType").setValue(selectedAction);
 
             Toast.makeText(ReportUpdate.this, "Report updated", Toast.LENGTH_SHORT).show();
 

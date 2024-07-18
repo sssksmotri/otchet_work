@@ -13,8 +13,9 @@
         android:layout_height="70dp"
         android:layout_marginEnd="16dp"
         android:scaleType="centerCrop"
-        android:background="@drawable/round_background"
-        android:clipToOutline="true" />
+        android:background="@drawable/form_background"
+        android:clipToOutline="true"
+        android:src="@drawable/ic_basic_kluch"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -41,10 +42,10 @@
             android:textColor="@android:color/black" />
 
         <TextView
-            android:id="@+id/descriptionTextView"
+            android:id="@+id/komnataTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Description of what was done"
+            android:text="komnata"
             android:textSize="14sp"
             android:textColor="@android:color/black" />
 

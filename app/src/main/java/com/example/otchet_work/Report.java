@@ -56,9 +56,9 @@ public class Report extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
     private String currentActionType;
-    private EditText editObjectName, editComments;
-    private Spinner spinnerApartments, spinnerActions, spinnerExistingObjects;
-    private ImageView imageViewPhoto;
+    private EditText editObjectName, editComments, editApartment, editRoomName, editQuantity;;
+    private Spinner spinnerApartments, spinnerActions, spinnerExistingObjects, spinnerExistingApartments;
+
     private TextView reportTitleTextView;
     private DatabaseReference existingObjectsRef;
 
@@ -76,16 +76,16 @@ public class Report extends AppCompatActivity {
 
         editObjectName = findViewById(R.id.editObjectName);
         editComments = findViewById(R.id.editComments);
-        spinnerApartments = findViewById(R.id.spinnerApartments);
+        editApartment = findViewById(R.id.editApartment);
+        editRoomName = findViewById(R.id.editRoomName);
+        editQuantity = findViewById(R.id.editQuantity);
         spinnerActions = findViewById(R.id.spinnerActions);
-        imageViewPhoto = findViewById(R.id.imageViewPhoto);
+        spinnerExistingObjects = findViewById(R.id.spinnerExistingObjects);
+        spinnerExistingApartments = findViewById(R.id.spinnerExistingApartments);
         reportTitleTextView = findViewById(R.id.textTitle);
         spinnerExistingObjects = findViewById(R.id.spinnerExistingObjects);
+        loadExistingApartments();
 
-        ArrayAdapter<CharSequence> apartmentsAdapter = ArrayAdapter.createFromResource(this,
-                R.array.apartments_array, android.R.layout.simple_spinner_item);
-        apartmentsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerApartments.setAdapter(apartmentsAdapter);
 
         ArrayAdapter<CharSequence> actionsAdapter = null;
 
@@ -94,44 +94,39 @@ public class Report extends AppCompatActivity {
 
         if (menuItemId == R.id.ventilation) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.ventilation_array, android.R.layout.simple_spinner_item);
+                    R.array.ventilation, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по вентиляции";
             actionType = "ventilation";
-        } else if (menuItemId == R.id.brickwork) {
+        } else if (menuItemId == R.id.floor_walls_ceilings) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.brickwork_array, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по кирпичным работам";
-            actionType = "brickwork";
+                    R.array.floor_walls_ceilings, android.R.layout.simple_spinner_item);
+            reportTitle = "Отчет по підлога / стіни / потолки ";
+            actionType = "floor_walls_ceilings";
         } else if (menuItemId == R.id.plumbing) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.plumbing_array, android.R.layout.simple_spinner_item);
+                    R.array.plumbing, android.R.layout.simple_spinner_item);
             reportTitle = "Отчет по сантехнике";
             actionType = "plumbing";
-        } else if (menuItemId == R.id.drywall) {
+        } else if (menuItemId == R.id.electricity) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.drywall_array, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по гипсокартонным работам";
-            actionType = "drywall";
-        } else if (menuItemId == R.id.floor_heating) {
+                    R.array.electricity, android.R.layout.simple_spinner_item);
+            reportTitle = "Отчет по електрике";
+            actionType = "electricity";
+        } else if (menuItemId == R.id.demolition_works) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.floor_heating_array, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по напольному отоплению";
-            actionType = "floor_heating";
-        } else if (menuItemId == R.id.switches_sockets) {
+                    R.array.demolition_works, android.R.layout.simple_spinner_item);
+            reportTitle = "Отчет по демонтажу";
+            actionType = "demolition_works";
+        } else if (menuItemId == R.id.furniture_assembly) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.switches_sockets_array, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по выключателям и розеткам";
-            actionType = "switches_sockets";
-        } else if (menuItemId == R.id.lighting) {
+                    R.array.furniture_assembly, android.R.layout.simple_spinner_item);
+            reportTitle = "Отчет по збирання меблів";
+            actionType = "furniture_assembly";
+        } else if (menuItemId == R.id.windows_doors) {
             actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.lighting_array, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по освещению";
-            actionType = "lighting";
-        } else if (menuItemId == R.id.doors) {
-            actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.doors_array, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по дверям";
-            actionType = "doors";
+                    R.array.windows_doors, android.R.layout.simple_spinner_item);
+            reportTitle = "Отчет по вікна / двері";
+            actionType = "windows_doors";
         }
 
         if (actionsAdapter != null) {
@@ -155,6 +150,29 @@ public class Report extends AppCompatActivity {
     }
     public void goBack() {
         finish();
+    }
+
+    private void loadExistingApartments() {
+        DatabaseReference existingApartmentsRef = FirebaseDatabase.getInstance().getReference("existing_apartments");
+        existingApartmentsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<String> apartmentsList = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String apartmentName = snapshot.getValue(String.class);
+                    apartmentsList.add(apartmentName);
+                }
+                ArrayAdapter<String> apartmentsAdapter = new ArrayAdapter<>(Report.this,
+                        android.R.layout.simple_spinner_item, apartmentsList);
+                apartmentsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerExistingApartments.setAdapter(apartmentsAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(Report.this, "Ошибка загрузки квартир", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     private void loadExistingObjects() {
         existingObjectsRef.addValueEventListener(new ValueEventListener() {
@@ -190,16 +208,18 @@ public class Report extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             imageUri = data.getData();
-            imageViewPhoto.setImageURI(imageUri);
         }
     }
 
     private void saveReport() {
         final String inputObjectName = editObjectName.getText().toString().trim();
         final String selectedObjectName = spinnerExistingObjects.getSelectedItem() != null ? spinnerExistingObjects.getSelectedItem().toString() : "";
-        final String apartment = spinnerApartments.getSelectedItem().toString().trim();
-        final String action = spinnerActions.getSelectedItem().toString().trim();
+        final String inputApartmentName = editApartment.getText().toString().trim();
+        final String selectedApartmentName = spinnerExistingApartments.getSelectedItem() != null ? spinnerExistingApartments.getSelectedItem().toString() : "";
+        final String actionWithUnit = spinnerActions.getSelectedItem().toString().trim();
         final String comments = editComments.getText().toString().trim();
+        String roomName = editRoomName.getText().toString().trim();
+        String quantity = editQuantity.getText().toString().trim();
         final String actionType = this.currentActionType;
 
         if (inputObjectName.isEmpty() && selectedObjectName.isEmpty()) {
@@ -207,12 +227,19 @@ public class Report extends AppCompatActivity {
             return;
         }
 
-        final String objectName;
+        final String objectName = !inputObjectName.isEmpty() ? inputObjectName : selectedObjectName;
         if (!inputObjectName.isEmpty()) {
             addNewObject(inputObjectName);
-            objectName = inputObjectName;
-        } else {
-            objectName = selectedObjectName;
+        }
+
+        if (inputApartmentName.isEmpty() && selectedApartmentName.isEmpty()) {
+            Toast.makeText(this, "Выберите или введите квартиру", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final String apartmentName = !inputApartmentName.isEmpty() ? inputApartmentName : selectedApartmentName;
+        if (!inputApartmentName.isEmpty()) {
+            addNewApartment(inputApartmentName);
         }
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -222,7 +249,7 @@ public class Report extends AppCompatActivity {
         }
 
         final String userId = currentUser.getUid();
-        DatabaseReference userReportsRef = FirebaseDatabase.getInstance().getReference("reports").child(userId);
+        DatabaseReference userReportsRef = databaseReference.child(userId);
 
         String reportId = userReportsRef.push().getKey();
         String datetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -242,8 +269,8 @@ public class Report extends AppCompatActivity {
                         String firstName = user.getFirstName();
                         String lastName = user.getLastName();
 
-                        if (objectName.isEmpty() || apartment.isEmpty() || action.isEmpty() || comments.isEmpty() || imageUri == null) {
-                            Toast.makeText(Report.this, "Заполните все поля и загрузите фото", Toast.LENGTH_SHORT).show();
+                        if (objectName.isEmpty() || apartmentName.isEmpty() || actionWithUnit.isEmpty()) {
+                            Toast.makeText(Report.this, "Введите данные", Toast.LENGTH_SHORT).show();
                             return;
                         }
 
@@ -251,55 +278,74 @@ public class Report extends AppCompatActivity {
                         progressDialog.setTitle("Сохранение отчета...");
                         progressDialog.show();
 
-                        // Folder structure for photos
-                        String photoFolder = "WORK/PHOTO/" + datetime.substring(0, 10) + "/" + objectName + "/" + apartment + "/";
-                        StorageReference objectFolderRef = storageReference.child(photoFolder);
+                        String[] actionParts = actionWithUnit.split(",");
+                        String action = actionParts[0].trim();
+                        String unit = actionParts.length > 1 ? actionParts[1].trim() : "";
 
-                        // File naming for photos
-                        StorageReference fileReference = objectFolderRef.child(objectName + "_" + apartment + "_" + System.currentTimeMillis() + "_" + firstName + "_" + lastName + ".jpg");
+                        if (imageUri != null) {
+                            // Folder structure for photos
+                            String photoFolder = "WORK/PHOTO/" + datetime.substring(0, 10) + "/" + objectName + "/" + apartmentName + "/";
+                            StorageReference objectFolderRef = storageReference.child(photoFolder);
 
-                        fileReference.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
-                            fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                                String photoUrl = uri.toString();
-                                // Use the correct constructor for ReportModel
-                                ReportModel reportModel = new ReportModel(action, apartment, comments, datetime, firstName, lastName, objectName, photoUrl, userId, actionType, reportId);
+                            // File naming for photos
+                            StorageReference fileReference = objectFolderRef.child(objectName + "_" + apartmentName + "_" + System.currentTimeMillis() + "_" + firstName + "_" + lastName + ".jpg");
 
-                                // Save report to Firebase Realtime Database under userId/reportId
-                                userReportsRef.child(reportId).setValue(reportModel).addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        try {
-                                            generateExcelReport(objectName, apartment, action, comments, photoUrl, datetime, firstName, lastName, reportId);
-                                            progressDialog.dismiss();
-                                            Toast.makeText(Report.this, "Отчет сохранен", Toast.LENGTH_SHORT).show();
-                                        } catch (IOException e) {
-                                            progressDialog.dismiss();
-                                            Toast.makeText(Report.this, "Ошибка при сохранении отчета", Toast.LENGTH_SHORT).show();
-                                            e.printStackTrace();
-                                        }
-                                    } else {
-                                        progressDialog.dismiss();
-                                        Toast.makeText(Report.this, "Ошибка при сохранении отчета", Toast.LENGTH_SHORT).show();
-                                    }
+                            fileReference.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+                                fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                                    String photoUrl = uri.toString();
+                                    saveReportToDatabase(progressDialog, userReportsRef, reportId, action, apartmentName, comments, datetime, firstName, lastName, objectName, photoUrl, userId, actionType, unit,roomName,quantity);
+                                }).addOnFailureListener(e -> {
+                                    progressDialog.dismiss();
+                                    Log.e("PhotoUpload", "Ошибка при получении URL фото: " + e.getMessage());
+                                    Toast.makeText(Report.this, "Ошибка при получении URL фото", Toast.LENGTH_SHORT).show();
                                 });
+                            }).addOnFailureListener(e -> {
+                                progressDialog.dismiss();
+                                Log.e("PhotoUpload", "Ошибка при загрузке фото: " + e.getMessage());
+                                Toast.makeText(Report.this, "Ошибка при загрузке фото", Toast.LENGTH_SHORT).show();
                             });
-                        }).addOnFailureListener(e -> {
-                            progressDialog.dismiss();
-                            Toast.makeText(Report.this, "Ошибка при загрузке фото", Toast.LENGTH_SHORT).show();
-                        });
+                        } else {
+                            // Если фотография не выбрана, сохраняем отчет без фото
+                            saveReportToDatabase(progressDialog, userReportsRef, reportId, action, apartmentName, comments, datetime, firstName, lastName, objectName, null, userId, actionType, unit,roomName,quantity);
+                        }
                     }
+                } else {
+                    Log.e("UserFetch", "Пользователь не найден в базе данных");
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("UserFetch", "Ошибка чтения данных пользователя: " + databaseError.getMessage());
                 Toast.makeText(Report.this, "Ошибка чтения данных пользователя", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    private void saveReportToDatabase(ProgressDialog progressDialog, DatabaseReference userReportsRef, String reportId, String action, String apartmentName, String comments, String datetime, String firstName, String lastName, String objectName, String photoUrl, String userId, String actionType, String unit,String roomName, String quantity) {
+        ReportModel reportModel = new ReportModel(action, apartmentName, comments, datetime, firstName, lastName, objectName, photoUrl, userId, actionType, reportId, unit,roomName,quantity);
 
+        userReportsRef.child(reportId).setValue(reportModel).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                try {
+                    generateExcelReport(objectName, apartmentName, action, comments, photoUrl, datetime, firstName, lastName, reportId, unit,roomName,quantity);
+                    progressDialog.dismiss();
+                    Toast.makeText(Report.this, "Отчет сохранен", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    progressDialog.dismiss();
+                    Toast.makeText(Report.this, "Ошибка при сохранении отчета", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            } else {
+                progressDialog.dismiss();
+                Log.e("ReportSave", "Ошибка при сохранении отчета: " + task.getException().getMessage());
+                Toast.makeText(Report.this, "Ошибка при сохранении отчета", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     private void addNewObject(final String objectName) {
+        DatabaseReference existingObjectsRef = FirebaseDatabase.getInstance().getReference("existing_objects");
         existingObjectsRef.child(objectName).setValue(objectName).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -311,15 +357,35 @@ public class Report extends AppCompatActivity {
             }
         });
     }
-    private void generateExcelReport(String objectName, String apartment, String action, String comments, String photoUrl, String dateTime, String firstName, String lastName, String reportId) throws IOException {
+
+    private void addNewApartment(final String apartmentName) {
+        DatabaseReference existingApartmentsRef = FirebaseDatabase.getInstance().getReference("existing_apartments");
+        existingApartmentsRef.child(apartmentName).setValue(apartmentName).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(Report.this, "Новая квартира добавлена", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(Report.this, "Ошибка добавления новой квартиры", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    public void generateExcelReport(String objectName, String apartment, String action, String comments, String photoUrl,
+                                    String dateTime, String firstName, String lastName, String reportId, String unit,
+                                    String roomName, String quantity) throws IOException {
+
         String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         String userFullName = firstName + "_" + lastName;
 
+        // Директория, где будут храниться отчеты
         File directory = new File(getExternalFilesDir(null), "WORK/REPORTS/" + currentDate);
         if (!directory.exists()) {
             directory.mkdirs();
         }
 
+        // Файл для записи отчета
         File file = new File(directory, userFullName + ".xlsx");
 
         XSSFWorkbook workbook;
@@ -327,88 +393,134 @@ public class Report extends AppCompatActivity {
         Row dataRow;
         Cell dataCell;
 
+        int newRowNumber;
         if (file.exists()) {
-            Log.d("ExcelReport", "File already exists. Opening...");
+            // Если файл уже существует, открываем его для добавления данных
             FileInputStream fis = new FileInputStream(file);
             workbook = new XSSFWorkbook(fis);
             sheet = workbook.getSheetAt(0);
             fis.close();
 
-            int lastRowNum = sheet.getLastRowNum();
-            dataRow = sheet.createRow(lastRowNum + 1);
+            newRowNumber = sheet.getLastRowNum() + 1;
+            dataRow = sheet.createRow(newRowNumber);
         } else {
-            Log.d("ExcelReport", "File doesn't exist. Creating new workbook...");
+            // Если файл не существует, создаем новую рабочую книгу
             workbook = new XSSFWorkbook();
-            sheet = workbook.createSheet("Report");
+            sheet = workbook.createSheet("Отчет");
 
+            // Создание заголовков для листа отчета
             Row headerRow = sheet.createRow(0);
-            Cell headerCell = headerRow.createCell(0);
-            headerCell.setCellValue("Имя объекта");
+            String[] headers = {"№ п/п", "Дата", "Время", "Звіт виконаних робіт", "од.вим", "к-ть", "Ціна", "Сума",
+                    "Кімната", "Об'єкт", "квартира №","Коментар", "Фотографія", "П.І.Б.", "ReportId"};
+            for (int i = 0; i < headers.length; i++) {
+                Cell headerCell = headerRow.createCell(i);
+                headerCell.setCellValue(headers[i]);
+            }
 
-            headerCell = headerRow.createCell(1);
-            headerCell.setCellValue("Квартира");
-
-            headerCell = headerRow.createCell(2);
-            headerCell.setCellValue("Действие");
-
-            headerCell = headerRow.createCell(3);
-            headerCell.setCellValue("Комментарий");
-
-            headerCell = headerRow.createCell(4);
-            headerCell.setCellValue("Фотография");
-
-            headerCell = headerRow.createCell(5);
-            headerCell.setCellValue("Дата и время");
-
-            headerCell = headerRow.createCell(6);
-            headerCell.setCellValue("Имя");
-
-            headerCell = headerRow.createCell(7);
-            headerCell.setCellValue("Фамилия");
-
-            headerCell = headerRow.createCell(8);
-            headerCell.setCellValue("ReportId");
-
-            dataRow = sheet.createRow(1);
+            newRowNumber = 1;
+            dataRow = sheet.createRow(newRowNumber);
         }
 
+        // Заполнение данными на листе отчета
         dataCell = dataRow.createCell(0);
-        dataCell.setCellValue(objectName);
+        dataCell.setCellValue(newRowNumber);
+
+        // Разделение даты и времени
+        String[] dateTimeParts = dateTime.split(" ");
+        String date = dateTimeParts[0];
+        String time = dateTimeParts[1];
 
         dataCell = dataRow.createCell(1);
-        dataCell.setCellValue(apartment);
+        dataCell.setCellValue(date); // Дата
 
         dataCell = dataRow.createCell(2);
-        dataCell.setCellValue(action);
+        dataCell.setCellValue(time); // Время
 
         dataCell = dataRow.createCell(3);
-        dataCell.setCellValue(comments);
+        dataCell.setCellValue(action);
 
         dataCell = dataRow.createCell(4);
-        dataCell.setCellValue(photoUrl);
+        dataCell.setCellValue(unit);
 
         dataCell = dataRow.createCell(5);
-        dataCell.setCellValue(dateTime);
+        dataCell.setCellValue(quantity);
 
-        dataCell = dataRow.createCell(6);
-        dataCell.setCellValue(firstName);
+        // Добавление пустых ячеек для "Цена" и "Сума"
+        dataCell = dataRow.createCell(6); // Цена (пусто)
+        dataCell.setCellValue("");
 
-        dataCell = dataRow.createCell(7);
-        dataCell.setCellValue(lastName);
+        dataCell = dataRow.createCell(7); // Сума (пусто)
+        dataCell.setCellValue("");
 
         dataCell = dataRow.createCell(8);
+        dataCell.setCellValue(roomName);
+
+        dataCell = dataRow.createCell(9);
+        dataCell.setCellValue(objectName);
+
+        dataCell = dataRow.createCell(10);
+        dataCell.setCellValue(apartment);
+
+        dataCell = dataRow.createCell(11);
+        dataCell.setCellValue(comments);
+
+
+        dataCell = dataRow.createCell(12);
+        dataCell.setCellValue(photoUrl);
+
+        dataCell = dataRow.createCell(13);
+        dataCell.setCellValue(firstName + " " + lastName);
+
+        dataCell = dataRow.createCell(14);
         dataCell.setCellValue(reportId);
 
+        // Создание листа для названия комнаты, если он не существует
+        XSSFSheet roomSheet = workbook.getSheet(roomName);
+        if (roomSheet == null) {
+            roomSheet = workbook.createSheet(roomName);
+
+            // Создание заголовков для листа комнаты
+            Row roomHeaderRow = roomSheet.createRow(0);
+            String[] roomHeaders = {"Дія", "од.вим", "к-ть", "Ціна", "Сума"};
+            for (int i = 0; i < roomHeaders.length; i++) {
+                Cell roomHeaderCell = roomHeaderRow.createCell(i);
+                roomHeaderCell.setCellValue(roomHeaders[i]);
+            }
+        }
+
+        // Добавление данных на лист комнаты
+        int roomNewRowNumber = roomSheet.getLastRowNum() + 1;
+        Row roomDataRow = roomSheet.createRow(roomNewRowNumber);
+
+        Cell roomDataCell = roomDataRow.createCell(0);
+        roomDataCell.setCellValue(action);
+
+        roomDataCell = roomDataRow.createCell(1);
+        roomDataCell.setCellValue(unit);
+
+        roomDataCell = roomDataRow.createCell(2);
+        roomDataCell.setCellValue(quantity);
+
+        // Добавление пустых ячеек для "Цена" и "Сума" на листе комнаты
+        roomDataCell = roomDataRow.createCell(3); // Цена (пусто)
+        roomDataCell.setCellValue("");
+
+        roomDataCell = roomDataRow.createCell(4); // Сума (пусто)
+        roomDataCell.setCellValue("");
+
+        // Запись рабочей книги в файл
         FileOutputStream fileOut = new FileOutputStream(file);
         workbook.write(fileOut);
         fileOut.close();
         workbook.close();
 
-        Log.d("ExcelReport", "Workbook successfully written to file: " + file.getAbsolutePath());
-
+        // Логирование успешной записи и инициация выгрузки
+        Log.d("ExcelReport", "Рабочая книга успешно записана в файл: " + file.getAbsolutePath());
         uploadExcelReport(file);
-        Log.d("ExcelReport", "Excel report upload initiated.");
+        Log.d("ExcelReport", "Инициирована выгрузка отчета Excel.");
     }
+
+
 
     private void uploadExcelReport(File file) {
         Uri fileUri = Uri.fromFile(file);

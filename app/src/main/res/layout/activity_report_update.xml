@@ -6,10 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
-    android:paddingTop="24dp"
-    android:paddingBottom="24dp"
+    android:padding="24dp"
     android:background="@android:color/white"
     tools:context=".ReportUpdate">
 
@@ -27,7 +24,9 @@
             android:orientation="vertical"
             android:padding="16dp"
             android:background="@drawable/form_background"
-            android:elevation="4dp">
+            android:elevation="4dp"
+            android:clipToPadding="false">
+
 
             <!-- Кнопка "Назад" и заголовок "Отчет" на одной строке -->
             <LinearLayout
@@ -43,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:layout_marginEnd="16dp"/>
+                    android:layout_marginEnd="16dp" />
 
                 <TextView
                     android:id="@+id/textTitle"
@@ -56,21 +55,46 @@
                     android:layout_gravity="center_vertical"/>
             </LinearLayout>
 
+            <ImageView
+                android:id="@+id/imageLogo"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:src="@drawable/logo"
+                android:layout_gravity="center"
+                android:layout_marginBottom="24dp"/>
+
+
             <!-- Имя объекта -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Введите имя объекта:"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="8dp"/>
+
             <EditText
                 android:id="@+id/editObjectName_up"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Имя объекта"
+                android:hint="Введите имя объекта"
                 android:inputType="text"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
                 android:textColor="@android:color/black"
                 android:layout_marginBottom="16dp"/>
 
+            <!-- Ввод квартиры -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Введите квартиру:"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="8dp"/>
 
             <EditText
-                android:id="@+id/editApartment"
+                android:id="@+id/editApartment_up"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Введите квартиру"
@@ -80,11 +104,20 @@
                 android:textColor="@android:color/black"
                 android:layout_marginBottom="16dp"/>
 
+            <!-- Название комнаты -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Введите название комнаты:"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="8dp"/>
+
             <EditText
                 android:id="@+id/editRoomName_up"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Название комнаты"
+                android:hint="Введите название комнаты"
                 android:inputType="text"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
@@ -94,7 +127,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Выберите действие"
+                android:text="Выберите действие:"
                 android:textSize="16sp"
                 android:textColor="@android:color/black"
                 android:layout_marginBottom="8dp"/>
@@ -109,22 +142,38 @@
                 android:layout_marginBottom="16dp"/>
 
             <!-- Поле для ввода количества -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Введите количество:"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="8dp"/>
+
             <EditText
                 android:id="@+id/editQuantity_up"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Количество"
+                android:hint="Введите количество"
                 android:inputType="number"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
                 android:layout_marginBottom="16dp"/>
 
             <!-- Поле для ввода комментария -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Введите комментарий:"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="8dp"/>
+
             <EditText
                 android:id="@+id/editComments_up"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Комментарий"
+                android:hint="Введите комментарий"
                 android:inputType="textMultiLine"
                 android:minLines="3"
                 android:maxLines="5"
@@ -142,19 +191,42 @@
                 android:background="@drawable/button_background"
                 android:padding="12dp"
                 android:textSize="16sp"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="24dp"/>
 
-            <!-- Кнопка сохранения отчета -->
-            <Button
-                android:id="@+id/buttonSaveReport_up"
+            <!-- Кнопки удаления и сохранения отчета -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Сохранить отчет"
-                android:textColor="@android:color/white"
-                android:background="@drawable/button_background"
-                android:padding="12dp"
-                android:textSize="16sp"
-                android:layout_marginBottom="16dp"/>
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="16dp">
+
+                <!-- Кнопка удаления отчета -->
+                <Button
+                    android:id="@+id/buttonDeleteReport_up"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Удалить отчет"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_delete"
+                    android:padding="12dp"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="8dp"/>
+
+                <!-- Кнопка сохранения отчета -->
+                <Button
+                    android:id="@+id/buttonSaveReport_up"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Сохранить изменения"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_background"
+                    android:padding="12dp"
+                    android:textSize="16sp"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
 
         </LinearLayout>
 

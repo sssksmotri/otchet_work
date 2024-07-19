@@ -22,9 +22,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
+            android:padding="24dp"
             android:background="@drawable/form_background"
-            android:elevation="4dp">
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:clipToPadding="false">
 
             <!-- Кнопка "Назад" и заголовок "Отчет" на одной строке -->
             <LinearLayout
@@ -39,8 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_back"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:layout_marginEnd="16dp"/>
+                    android:background="?attr/selectableItemBackgroundBorderless" />
 
                 <TextView
                     android:id="@+id/textTitle"
@@ -51,8 +52,15 @@
                     android:textColor="#6200EE"
                     android:textStyle="bold"
                     android:layout_gravity="center_vertical"/>
-            </LinearLayout>
 
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/imageLogo"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:src="@drawable/logo"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp"/>
             <!-- Имя объекта -->
             <EditText
                 android:id="@+id/editObjectName"
@@ -63,15 +71,16 @@
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp"
+                />
 
             <!-- Подпись для выбора существующего объекта -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Можете выбрать существующий объект"
+                android:text="Выберите существующий объект"
                 android:textSize="16sp"
-                android:textColor="@android:color/black"
+                android:textColor="#333333"
                 android:layout_marginBottom="8dp"/>
 
             <!-- Выбор существующего объекта -->
@@ -81,7 +90,8 @@
                 android:layout_height="wrap_content"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp"
+                />
 
             <!-- Поле для ввода квартиры -->
             <EditText
@@ -93,15 +103,16 @@
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp"
+                />
 
             <!-- Подпись для выбора квартиры -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Можете выбрать существующую квартиру"
+                android:text="Выберите существующую квартиру"
                 android:textSize="16sp"
-                android:textColor="@android:color/black"
+                android:textColor="#333333"
                 android:layout_marginBottom="8dp"/>
 
             <!-- Выбор квартиры -->
@@ -111,7 +122,7 @@
                 android:layout_height="wrap_content"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp" />
 
             <!-- Поле для ввода названия комнаты -->
             <EditText
@@ -122,7 +133,7 @@
                 android:inputType="text"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp" />
 
             <!-- Подпись для выбора действия -->
             <TextView
@@ -130,7 +141,7 @@
                 android:layout_height="wrap_content"
                 android:text="Выберите действие"
                 android:textSize="16sp"
-                android:textColor="@android:color/black"
+                android:textColor="#333333"
                 android:layout_marginBottom="8dp"/>
 
             <!-- Выбор действия -->
@@ -140,7 +151,7 @@
                 android:layout_height="wrap_content"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp" />
 
             <!-- Поле для ввода количества -->
             <EditText
@@ -151,7 +162,7 @@
                 android:inputType="number"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp" />
 
             <!-- Поле для ввода комментария -->
             <EditText
@@ -164,7 +175,7 @@
                 android:maxLines="5"
                 android:padding="12dp"
                 android:background="@drawable/edit_text_background"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp" />
 
             <!-- Кнопка загрузки фото -->
             <Button

@@ -17,6 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Otchet_work"
         tools:targetApi="31">
+        <activity android:name=".ViborOtchet"
+            android:exported="false"/>
         <activity
             android:name=".ProfileActivity"
             android:exported="false" />

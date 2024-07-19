@@ -68,8 +68,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         bottomNavigationView = findViewById(R.id.navigation_bar);
         bottomNavigationView.setOnNavigationItemSelectedListener(this); // Установка слушателя
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(this::showPopupMenu);
+
 
         searchView = findViewById(R.id.search_view);
         searchView.setIconifiedByDefault(false);
@@ -90,6 +89,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         } else if (id == R.id.navigation_profile) {
 
             startActivity(new Intent(this, ProfileActivity.class));
+            return true;
+        }
+        else if (id == R.id.navigation_create) {
+
+            startActivity(new Intent(this, ViborOtchet.class));
             return true;
         }
 
@@ -124,20 +128,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         });
     }
 
-    private void showPopupMenu(View view) {
-        PopupMenu popupMenu = new PopupMenu(this, view);
-        popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
 
-        popupMenu.setOnMenuItemClickListener(item -> {
-            Intent intent = new Intent(MainActivity.this, Report.class);
-            intent.putExtra("menuItem", item.getItemId());
-            intent.putExtra("userId", userId);
-            startActivity(intent);
-            return true;
-        });
-
-        popupMenu.show();
-    }
 
     private void setupSearchView() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

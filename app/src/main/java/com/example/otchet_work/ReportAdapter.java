@@ -75,7 +75,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
 
         holder.komnataTextView.setText(report.getRoomName());
-
+        holder.kvartiraTextView.setText(report.getApartment());
         holder.timeTextView.setText(report.getDatetime()); // Установка времени
 
         // Загрузка изображения с помощью Glide
@@ -105,8 +105,8 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
-        TextView nameTextView;
-        TextView komnataTextView;
+        TextView nameTextView,kvartiraTextView,komnataTextView;
+
         TextView timeTextView; // Добавлено поле для времени
 
         public ReportViewHolder(@NonNull View itemView) {
@@ -115,7 +115,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             nameTextView = itemView.findViewById(R.id.nameTextView);
             komnataTextView = itemView.findViewById(R.id.komnataTextView);
             timeTextView = itemView.findViewById(R.id.timeTextView); // Инициализация TextView времени
-
+            kvartiraTextView=itemView.findViewById(R.id.kvartiraTextView);
 
         }
     }

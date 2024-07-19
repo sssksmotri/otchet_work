@@ -56,9 +56,8 @@ public class Report extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
     private String currentActionType;
-    private EditText editObjectName, editComments, editApartment, editRoomName, editQuantity;;
-    private Spinner spinnerApartments, spinnerActions, spinnerExistingObjects, spinnerExistingApartments;
-
+    private EditText editObjectName, editComments, editApartment, editRoomName, editQuantity;
+    private Spinner spinnerActions, spinnerExistingObjects, spinnerExistingApartments;
     private TextView reportTitleTextView;
     private DatabaseReference existingObjectsRef;
 
@@ -67,13 +66,12 @@ public class Report extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
 
-        int menuItemId = getIntent().getIntExtra("menuItem", R.id.ventilation);
-        String userId = getIntent().getStringExtra("userId");
-
+        // Инициализация Firebase
         databaseReference = FirebaseDatabase.getInstance().getReference("reports");
         storageReference = FirebaseStorage.getInstance().getReference();
         existingObjectsRef = FirebaseDatabase.getInstance().getReference("existing_objects");
 
+        // Инициализация элементов интерфейса
         editObjectName = findViewById(R.id.editObjectName);
         editComments = findViewById(R.id.editComments);
         editApartment = findViewById(R.id.editApartment);
@@ -83,50 +81,41 @@ public class Report extends AppCompatActivity {
         spinnerExistingObjects = findViewById(R.id.spinnerExistingObjects);
         spinnerExistingApartments = findViewById(R.id.spinnerExistingApartments);
         reportTitleTextView = findViewById(R.id.textTitle);
-        spinnerExistingObjects = findViewById(R.id.spinnerExistingObjects);
-        loadExistingApartments();
 
+        // Получение данных из Intent
+        Intent intent = getIntent();
+        String reportTitle = intent.getStringExtra("REPORT_TITLE");
+        currentActionType = intent.getStringExtra("ACTION_TYPE");
 
+        // Установка заголовка отчета
+        reportTitleTextView.setText(reportTitle);
+
+        // Настройка адаптера для Spinner в зависимости от текущего типа действия
         ArrayAdapter<CharSequence> actionsAdapter = null;
-
-        String reportTitle = "";
-        String actionType = "";
-
-        if (menuItemId == R.id.ventilation) {
-            actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.ventilation, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по вентиляции";
-            actionType = "ventilation";
-        } else if (menuItemId == R.id.floor_walls_ceilings) {
-            actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.floor_walls_ceilings, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по підлога / стіни / потолки ";
-            actionType = "floor_walls_ceilings";
-        } else if (menuItemId == R.id.plumbing) {
-            actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.plumbing, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по сантехнике";
-            actionType = "plumbing";
-        } else if (menuItemId == R.id.electricity) {
-            actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.electricity, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по електрике";
-            actionType = "electricity";
-        } else if (menuItemId == R.id.demolition_works) {
-            actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.demolition_works, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по демонтажу";
-            actionType = "demolition_works";
-        } else if (menuItemId == R.id.furniture_assembly) {
-            actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.furniture_assembly, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по збирання меблів";
-            actionType = "furniture_assembly";
-        } else if (menuItemId == R.id.windows_doors) {
-            actionsAdapter = ArrayAdapter.createFromResource(this,
-                    R.array.windows_doors, android.R.layout.simple_spinner_item);
-            reportTitle = "Отчет по вікна / двері";
-            actionType = "windows_doors";
+        if (currentActionType != null) {
+            switch (currentActionType) {
+                case "ventilation":
+                    actionsAdapter = ArrayAdapter.createFromResource(this, R.array.ventilation, android.R.layout.simple_spinner_item);
+                    break;
+                case "floor_walls_ceilings":
+                    actionsAdapter = ArrayAdapter.createFromResource(this, R.array.floor_walls_ceilings, android.R.layout.simple_spinner_item);
+                    break;
+                case "plumbing":
+                    actionsAdapter = ArrayAdapter.createFromResource(this, R.array.plumbing, android.R.layout.simple_spinner_item);
+                    break;
+                case "electricity":
+                    actionsAdapter = ArrayAdapter.createFromResource(this, R.array.electricity, android.R.layout.simple_spinner_item);
+                    break;
+                case "demolition_works":
+                    actionsAdapter = ArrayAdapter.createFromResource(this, R.array.demolition_works, android.R.layout.simple_spinner_item);
+                    break;
+                case "furniture_assembly":
+                    actionsAdapter = ArrayAdapter.createFromResource(this, R.array.furniture_assembly, android.R.layout.simple_spinner_item);
+                    break;
+                case "windows_doors":
+                    actionsAdapter = ArrayAdapter.createFromResource(this, R.array.windows_doors, android.R.layout.simple_spinner_item);
+                    break;
+            }
         }
 
         if (actionsAdapter != null) {
@@ -134,20 +123,20 @@ public class Report extends AppCompatActivity {
             spinnerActions.setAdapter(actionsAdapter);
         }
 
-        this.currentActionType = actionType;
-        reportTitleTextView.setText(reportTitle);
-
-        // Initialize the existing objects spinner
+        // Инициализация существующих объектов и установка обработчиков кнопок
         loadExistingObjects();
+        loadExistingApartments();
 
         Button buttonUploadPhoto = findViewById(R.id.buttonUploadPhoto);
         buttonUploadPhoto.setOnClickListener(v -> openFileChooser());
 
         Button buttonSaveReport = findViewById(R.id.buttonSaveReport);
         buttonSaveReport.setOnClickListener(v -> saveReport());
-        ImageButton back_btn = findViewById(R.id.buttonBack);
-        back_btn.setOnClickListener(v -> goBack());
+
+        ImageButton backButton = findViewById(R.id.buttonBack);
+        backButton.setOnClickListener(v -> goBack());
     }
+
     public void goBack() {
         finish();
     }
@@ -464,7 +453,6 @@ public class Report extends AppCompatActivity {
         dataCell = dataRow.createCell(11);
         dataCell.setCellValue(comments);
 
-
         dataCell = dataRow.createCell(12);
         dataCell.setCellValue(photoUrl);
 
@@ -481,7 +469,7 @@ public class Report extends AppCompatActivity {
 
             // Создание заголовков для листа комнаты
             Row roomHeaderRow = roomSheet.createRow(0);
-            String[] roomHeaders = {"Дія", "од.вим", "к-ть", "Ціна", "Сума"};
+            String[] roomHeaders = {"Дія", "од.вим", "к-ть", "Ціна", "Сума", "ReportId"};
             for (int i = 0; i < roomHeaders.length; i++) {
                 Cell roomHeaderCell = roomHeaderRow.createCell(i);
                 roomHeaderCell.setCellValue(roomHeaders[i]);
@@ -507,6 +495,9 @@ public class Report extends AppCompatActivity {
 
         roomDataCell = roomDataRow.createCell(4); // Сума (пусто)
         roomDataCell.setCellValue("");
+
+        roomDataCell = roomDataRow.createCell(5); // ReportId
+        roomDataCell.setCellValue(reportId);
 
         // Запись рабочей книги в файл
         FileOutputStream fileOut = new FileOutputStream(file);

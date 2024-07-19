@@ -89,6 +89,11 @@ public class ProfileActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.navigation_profile) {
             return true;
         }
+        else if (item.getItemId() == R.id.navigation_create) {
+
+            startActivity(new Intent(this, ViborOtchet.class));
+            return true;
+        }
         return false;
     }
 

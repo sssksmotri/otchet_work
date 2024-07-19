@@ -55,12 +55,13 @@ public class ReportUpdate extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private StorageReference storageReference;
 
-    private EditText editObjectName_up, editComments_up;
-    private ImageView imageViewPhoto;
-    private Spinner spinnerActions_up;
-    private Button buttonUploadPhoto_up, buttonSaveReport_up;
+    private EditText editObjectName, editComments,editRoomName,editQuantity,editApartaments;
+
+    private Spinner  spinnerActions;
+    private Button buttonUpdateReport, buttonDeleteReport, buttonUploadPhoto;
     private String reportId, photoUri;
     private static final int PICK_IMAGE_REQUEST = 1;
+    private Uri imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,11 +74,15 @@ public class ReportUpdate extends AppCompatActivity {
         storageReference = FirebaseStorage.getInstance().getReference();
 
         // Initialize views
-        editObjectName_up = findViewById(R.id.editObjectName_up);
-        editComments_up = findViewById(R.id.editComments_up);
-        spinnerActions_up = findViewById(R.id.spinnerActions_up);
-        buttonUploadPhoto_up = findViewById(R.id.buttonUploadPhoto_up);
-        buttonSaveReport_up = findViewById(R.id.buttonSaveReport_up);
+        editObjectName = findViewById(R.id.editObjectName_up);
+        editComments = findViewById(R.id.editComments_up);
+        editRoomName=findViewById(R.id.editRoomName_up);
+        editQuantity=findViewById(R.id.editQuantity_up);
+        editApartaments=findViewById(R.id.editApartment_up);
+        buttonUpdateReport = findViewById(R.id.buttonSaveReport_up);
+        buttonDeleteReport = findViewById(R.id.buttonDeleteReport_up);
+        buttonUploadPhoto = findViewById(R.id.buttonUploadPhoto_up);
+        spinnerActions = findViewById(R.id.spinnerActions_up);
 
         // Get reportId from intent extras
         reportId = getIntent().getStringExtra("reportId");
@@ -90,32 +95,39 @@ public class ReportUpdate extends AppCompatActivity {
             loadReportDetails();
         }
 
-        // Setup Spinner for actions
-        loadActionSpinner("ventilation"); // Example initialization, change as per your logic
-
         // Setup onClickListeners
-        buttonSaveReport_up.setOnClickListener(new View.OnClickListener() {
+        buttonUpdateReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateReport();
             }
         });
 
-        buttonUploadPhoto_up.setOnClickListener(new View.OnClickListener() {
+        buttonDeleteReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Implement photo upload logic
+                confirmDeleteReport();
             }
         });
+
+        buttonUploadPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openFileChooser();
+            }
+        });
+
+        // Setup Spinner for apartments
+
 
         ImageButton back_btn = findViewById(R.id.buttonBack_up);
         back_btn.setOnClickListener(v -> goBack());
     }
-
-    private void goBack() {
+    public void goBack() {
         finish();
     }
 
+    // Method to load report details from Firebase
     private void loadReportDetails() {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
@@ -128,15 +140,16 @@ public class ReportUpdate extends AppCompatActivity {
                         ReportModel report = dataSnapshot.getValue(ReportModel.class);
                         if (report != null) {
                             // Set retrieved data to views
-                            editObjectName_up.setText(report.getObjectName());
-                            editComments_up.setText(report.getComments());
-                            // Load photo with Glide
+                            editObjectName.setText(report.getObjectName());
+                            editComments.setText(report.getComments());
                             Glide.with(ReportUpdate.this)
-                                    .load(report.getPhotoUri())
-                                    .into(imageViewPhoto);
+                                    .load(report.getPhotoUri());
                             photoUri = report.getPhotoUri();
-                            // Load spinner with correct action type
                             loadActionSpinner(report.getActionType());
+                            // Select correct apartment from spinner
+                            editApartaments.setText(report.getApartment());
+                            editQuantity.setText(report.getQuantity());
+                            editRoomName.setText(report.getRoomName());
                         }
                     }
                 }
@@ -150,7 +163,6 @@ public class ReportUpdate extends AppCompatActivity {
             Toast.makeText(ReportUpdate.this, "User is not authenticated", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     // Method to load appropriate actions array in spinner
     private void loadActionSpinner(String actionType) {
@@ -182,14 +194,17 @@ public class ReportUpdate extends AppCompatActivity {
         ArrayAdapter<CharSequence> actionsAdapter = ArrayAdapter.createFromResource(this,
                 arrayId, android.R.layout.simple_spinner_item);
         actionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerActions_up.setAdapter(actionsAdapter);
+        spinnerActions.setAdapter(actionsAdapter);
     }
 
     // Method to update report details in Firebase
     private void updateReport() {
-        String updatedObjectName = editObjectName_up.getText().toString().trim();
-        String updatedComments = editComments_up.getText().toString().trim();
-        String selectedAction = spinnerActions_up.getSelectedItem().toString();
+        String updatedObjectName = editObjectName.getText().toString().trim();
+        String updatedComments = editComments.getText().toString().trim();
+        String updateApartament = editApartaments.getText().toString().trim();
+        String roomName = editRoomName.getText().toString().trim();
+        String quantity = editQuantity.getText().toString().trim();
+        String selectedAction = spinnerActions.getSelectedItem().toString();
 
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
@@ -199,7 +214,13 @@ public class ReportUpdate extends AppCompatActivity {
             // Update report data in Firebase
             reportRef.child("objectName").setValue(updatedObjectName);
             reportRef.child("comments").setValue(updatedComments);
-            reportRef.child("actionType").setValue(selectedAction);
+            reportRef.child("apartment").setValue(updateApartament);
+            reportRef.child("action").setValue(selectedAction);
+            reportRef.child("roomName").setValue(roomName);
+            reportRef.child("quantity").setValue(quantity);
+
+            // Update report data in Excel
+            updateInExcel(reportId, updatedObjectName, updatedComments, updateApartament, selectedAction, roomName, quantity);
 
             Toast.makeText(ReportUpdate.this, "Report updated", Toast.LENGTH_SHORT).show();
 
@@ -211,7 +232,7 @@ public class ReportUpdate extends AppCompatActivity {
     }
 
     // Method to update data in Excel file
-    private void updateInExcel(String reportId, String objectName, String comments, String apartment, String action) {
+    private void updateInExcel(String reportId, String objectName, String comments, String apartment, String action, String roomName, String quantity) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             String userId = currentUser.getUid();
@@ -241,47 +262,120 @@ public class ReportUpdate extends AppCompatActivity {
 
                             File file = new File(directory, userFullName + ".xlsx");
 
+                            XSSFWorkbook workbook;
                             if (file.exists()) {
                                 Log.d("File Path", "Excel file exists: " + file.getAbsolutePath());
-                                try (FileInputStream fis = new FileInputStream(file);
-                                     XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
-
-                                    XSSFSheet sheet = workbook.getSheetAt(0); // Assuming there's only one sheet
-
-                                    // Find and update the row (for example, by reportId)
-                                    Iterator<Row> iterator = sheet.iterator();
-                                    boolean isUpdated = false;
-                                    while (iterator.hasNext()) {
-                                        Row currentRow = iterator.next();
-                                        Cell cell = currentRow.getCell(8); // Assuming reportId is in the 9th column
-                                        if (cell != null && cell.getStringCellValue().equals(reportId)) {
-                                            // Update the row with new data
-                                            currentRow.getCell(0).setCellValue(objectName);
-                                            currentRow.getCell(1).setCellValue(apartment);
-                                            currentRow.getCell(2).setCellValue(action);
-                                            currentRow.getCell(3).setCellValue(comments);
-                                            isUpdated = true;
-                                            break;
-                                        }
-                                    }
-
-                                    if (isUpdated) {
-                                        try (FileOutputStream fos = new FileOutputStream(file)) {
-                                            workbook.write(fos);
-                                            Log.d("Excel Update", "Excel file updated successfully");
-                                            uploadExcelReport(file);
-                                        }
-                                    } else {
-                                        Log.e("Excel Update", "Report ID not found in the Excel file");
-                                        Toast.makeText(ReportUpdate.this, "Report ID not found in the Excel file", Toast.LENGTH_SHORT).show();
-                                    }
+                                try (FileInputStream fis = new FileInputStream(file)) {
+                                    workbook = new XSSFWorkbook(fis);
                                 } catch (IOException e) {
                                     e.printStackTrace();
-                                    Toast.makeText(ReportUpdate.this, "Failed to update Excel file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ReportUpdate.this, "Failed to read Excel file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    return;
                                 }
                             } else {
-                                Log.e("File Path", "Excel file does not exist: " + file.getAbsolutePath());
-                                Toast.makeText(ReportUpdate.this, "Excel file does not exist", Toast.LENGTH_SHORT).show();
+                                Log.d("File Path", "Excel file does not exist, creating a new one: " + file.getAbsolutePath());
+                                workbook = new XSSFWorkbook();
+                                XSSFSheet sheet = workbook.createSheet("Отчет");
+
+                                // Create headers for the main sheet
+                                Row headerRow = sheet.createRow(0);
+                                String[] headers = {"№ п/п", "Дата", "Время", "Звіт виконаних робіт", "од.вим", "к-ть", "Ціна", "Сума",
+                                        "Кімната", "Об'єкт", "квартира №","Коментар", "Фотографія", "П.І.Б.", "ReportId"};
+                                for (int i = 0; i < headers.length; i++) {
+                                    Cell headerCell = headerRow.createCell(i);
+                                    headerCell.setCellValue(headers[i]);
+                                }
+                            }
+
+                            XSSFSheet sheet = workbook.getSheetAt(0); // Assuming there's only one sheet
+
+                            // Find and update the row (for example, by reportId)
+                            Iterator<Row> iterator = sheet.iterator();
+                            boolean isUpdated = false;
+                            while (iterator.hasNext()) {
+                                Row currentRow = iterator.next();
+                                Cell cell = currentRow.getCell(14); // Assuming reportId is in the 15th column
+                                if (cell != null && cell.getStringCellValue().equals(reportId)) {
+                                    // Split action into action and unit
+                                    String[] actionParts = action.split(",");
+                                    String actionPart = actionParts[0].trim();
+                                    String unitPart = actionParts.length > 1 ? actionParts[1].trim() : "";
+
+                                    // Update the row with new data
+                                    currentRow.getCell(9).setCellValue(objectName);
+                                    currentRow.getCell(10).setCellValue(apartment);
+                                    currentRow.getCell(3).setCellValue(actionPart);
+                                    currentRow.getCell(11).setCellValue(comments);
+                                    currentRow.getCell(8).setCellValue(roomName);
+                                    currentRow.getCell(5).setCellValue(quantity);
+                                    currentRow.getCell(4).setCellValue(unitPart); // Update од.вим with unit part
+                                    isUpdated = true;
+                                    break;
+                                }
+                            }
+
+                            // Update or create room sheet
+                            XSSFSheet roomSheet = workbook.getSheet(roomName);
+                            if (roomSheet == null) {
+                                roomSheet = workbook.createSheet(roomName);
+
+                                // Create headers for the room sheet
+                                Row roomHeaderRow = roomSheet.createRow(0);
+                                String[] roomHeaders = {"Дія", "од.вим", "к-ть", "Ціна", "Сума", "ReportId"};
+                                for (int i = 0; i < roomHeaders.length; i++) {
+                                    Cell roomHeaderCell = roomHeaderRow.createCell(i);
+                                    roomHeaderCell.setCellValue(roomHeaders[i]);
+                                }
+                            }
+
+                            // Find and update or add data to the room sheet
+                            boolean isRoomUpdated = false;
+                            Iterator<Row> roomIterator = roomSheet.iterator();
+                            while (roomIterator.hasNext()) {
+                                Row currentRow = roomIterator.next();
+                                Cell cell = currentRow.getCell(5); // Assuming reportId is in the 6th column in room sheet
+                                if (cell != null && cell.getStringCellValue().equals(reportId)) {
+                                    String[] actionParts = action.split(",");
+                                    String actionPart = actionParts[0].trim();
+                                    String unitPart = actionParts.length > 1 ? actionParts[1].trim() : "";
+
+                                    // Update the row with new data
+                                    currentRow.getCell(0).setCellValue(actionPart);
+                                    currentRow.getCell(1).setCellValue(unitPart);
+                                    currentRow.getCell(2).setCellValue(quantity);
+                                    isRoomUpdated = true;
+                                    break;
+                                }
+                            }
+
+                            if (!isRoomUpdated) {
+                                String[] actionParts = action.split(",");
+                                String actionPart = actionParts[0].trim();
+                                String unitPart = actionParts.length > 1 ? actionParts[1].trim() : "";
+                                // Add data to the room sheet
+                                int roomNewRowNumber = roomSheet.getLastRowNum() + 1;
+                                Row roomDataRow = roomSheet.createRow(roomNewRowNumber);
+
+                                roomDataRow.createCell(0).setCellValue(actionPart);
+                                roomDataRow.createCell(1).setCellValue(unitPart);
+                                roomDataRow.createCell(2).setCellValue(quantity);
+                                roomDataRow.createCell(3).setCellValue(""); // Цена
+                                roomDataRow.createCell(4).setCellValue(""); // Сума
+                                roomDataRow.createCell(5).setCellValue(reportId); // ReportId
+                            }
+
+                            try (FileOutputStream fos = new FileOutputStream(file)) {
+                                workbook.write(fos);
+                                if (isUpdated || isRoomUpdated) {
+                                    Log.d("Excel Update", "Excel file updated successfully");
+                                    uploadExcelReport(file);
+                                } else {
+                                    Log.e("Excel Update", "Report ID not found in the Excel file");
+                                    Toast.makeText(ReportUpdate.this, "Report ID not found in the Excel file", Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Toast.makeText(ReportUpdate.this, "Failed to update Excel file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     }
@@ -400,7 +494,7 @@ public class ReportUpdate extends AppCompatActivity {
                                     Iterator<Row> iterator = sheet.iterator();
                                     while (iterator.hasNext()) {
                                         Row currentRow = iterator.next();
-                                        Cell cell = currentRow.getCell(8); // Assuming reportId is in the 9th column
+                                        Cell cell = currentRow.getCell(14); // Assuming reportId is in the 9th column
                                         if (cell != null && cell.getStringCellValue().equals(reportId)) {
                                             // Delete the row from sheet
                                             sheet.removeRow(currentRow);
@@ -467,7 +561,7 @@ public class ReportUpdate extends AppCompatActivity {
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             imageUri = data.getData();
-            imageViewPhoto.setImageURI(imageUri);
+
 
             // Upload selected image to Firebase Storage
             uploadPhoto(imageUri);
@@ -479,7 +573,7 @@ public class ReportUpdate extends AppCompatActivity {
         if (imageUri != null) {
             // Define the folder path based on objectName, apartment, and current date
             String currentDateTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(new Date());
-            String photoFolder = "WORK/PHOTO/" + currentDateTime.substring(0, 10) + "/" + editObjectName.getText().toString().trim() + "/" + spinnerApartments.getSelectedItem().toString() + "/";
+            String photoFolder = "WORK/PHOTO/" + currentDateTime.substring(0, 10) + "/" + editObjectName.getText().toString().trim() + "/" + editApartaments.getText().toString().trim() + "/";
             StorageReference objectFolderRef = storageReference.child(photoFolder);
 
             // Upload the photo to Firebase Storage
@@ -543,10 +637,10 @@ public class ReportUpdate extends AppCompatActivity {
                                     boolean isUpdated = false;
                                     while (iterator.hasNext()) {
                                         Row currentRow = iterator.next();
-                                        Cell cell = currentRow.getCell(8); // Assuming reportId is in the 9th column
+                                        Cell cell = currentRow.getCell(14); // Assuming reportId is in the 9th column
                                         if (cell != null && cell.getStringCellValue().equals(reportId)) {
                                             // Update the row with new photoUri
-                                            currentRow.getCell(4).setCellValue(photoUri); // Assuming photoUri is in the 5th column
+                                            currentRow.getCell(12).setCellValue(photoUri); // Assuming photoUri is in the 5th column
                                             isUpdated = true;
                                             break;
                                         }

@@ -8,6 +8,38 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <!-- Header Section -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="#3F51B5"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Завантажені звіти"
+            android:textSize="24sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Переглядайте і керуйте своїми звітами"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
     <!-- SearchView -->
     <androidx.appcompat.widget.SearchView
         android:id="@+id/search_view"
@@ -19,9 +51,9 @@
         android:background="@drawable/search_background"
         android:iconifiedByDefault="false"
         android:queryHint="Search reports..."
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
@@ -47,23 +79,15 @@
         app:layout_constraintStart_toStartOf="@id/recyclerView"
         app:layout_constraintTop_toTopOf="@id/recyclerView" />
 
-    <!-- FloatingActionButton -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_edit"
-        app:backgroundTint="#6200EE"
-        app:layout_constraintBottom_toBottomOf="@+id/recyclerView"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <!-- FloatingActionButton (if needed) -->
+    <!-- FloatingActionButton here -->
 
     <!-- BottomNavigationView -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/form_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
